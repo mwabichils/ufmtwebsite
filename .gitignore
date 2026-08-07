@@ -1,0 +1,52 @@
+# =============================================================================
+# UFMT website
+#
+# NOTE: github.com/mwabichils/ufmtwebsite is a PUBLIC repository. Everything
+# committed here is world-readable and stays in the git history even if it is
+# deleted later. The exclusions below are deliberate — read the reasons before
+# removing any of them.
+# =============================================================================
+
+# --- Confidential. Must not be published ------------------------------------
+# The compliance audit carries an explicit notice: "strictly confidential and
+# may not be copied, reproduced, reverse-engineered, modified, or distributed
+# to any third party, in whole or in part, without the express prior written
+# consent of NorthLight Advisory." Pushing it to a public repo is distribution.
+HPCSA Regulatory and Ethical Compliance Audit*.docx
+audit-extract.txt
+
+# --- Personal data -----------------------------------------------------------
+# Photographs of a named individual who is not part of this service. Already
+# removed from the site; the source file should not be republished either.
+DR MPEHLE.png
+img/dr-mpehle.*
+
+# --- Client and agency work product ------------------------------------------
+# Approved copy documents, including internal pre-publication notes.
+UFMT_Website_Copy_V5*.docx
+UFMT_Website_Copy_V5.md
+
+# --- Third-party documents ---------------------------------------------------
+# Published by the HPCSA. No reason to rehost it here.
+HPCSA-Booklet-*.pdf
+
+# --- Source and working files, not needed to run the site --------------------
+# Full-resolution originals. The deployed derivatives live in img/.
+Hero Woman 1*.jpg
+Hero Woman 1*.webp
+# 1 MB of base64 PNG in an SVG wrapper. Not a usable vector — see README.
+UFMT Logo svg.svg
+img/UFMT Logo svg.svg
+img/_s.png
+
+# --- Build and review artefacts ----------------------------------------------
+preview-*.png
+*.bak
+
+# --- Tooling and OS ----------------------------------------------------------
+node_modules/
+package-lock.json
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp

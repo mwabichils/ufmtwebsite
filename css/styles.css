@@ -1,0 +1,1268 @@
+@charset "UTF-8";
+/* ==========================================================================
+   UFMT HIFU Fibroid Clinic
+   Layout, rhythm and motion modelled on moovia.be, rebuilt on the UFMT
+   colour, type and accessibility system defined in UFMT_Website_Build_Brief.md.
+
+   Structure
+   00  Reset and tokens
+   01  Header, round buttons, overlay navigation
+   02  Buttons
+   03  Hero (.head)
+   04  The pathway motif and hero zoom
+   05  Sections, columns, bleeding rules
+   06  Content components
+   07  Steps
+   08  Comparison table
+   09  FAQ
+   10  Form
+   11  Quick action bar
+   12  Footer
+   13  Scroll reveal and reduced motion
+   ========================================================================== */
+
+/* ==========================================================================
+   00  Reset and tokens
+   ========================================================================== */
+
+html, body, div, span, iframe,
+h1, h2, h3, h4, p, blockquote,
+a, address, code, em, img, s, strong, var, u, i,
+dl, dt, dd, ol, ul, li, form, label, table, caption, tbody, thead, tr, th, td,
+details, summary, figure, figcaption, footer, header, main, menu, nav, section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+details, figcaption, figure, footer, header, main, menu, nav, section { display: block; }
+ul, ol.plain { list-style: none; }
+blockquote { quotes: none; }
+blockquote:before, blockquote:after { content: ""; content: none; }
+*, *:before, *:after { box-sizing: border-box; }
+
+:root {
+  /* UFMT core colour system */
+  --midnight-plum:   #342A50;  /* primary authority. headings, dark sections, footer */
+  --clinical-navy:   #646B91;  /* secondary. semantic H2s, supporting text, UI */
+  --future-blue:     #A1B0CE;  /* support. backgrounds, dividers, accents. NEVER text on white */
+  --innovation-rose: #DAA9A4;  /* human accent. buttons, highlights, rules */
+  --soft-blush:      #F2E4E5;  /* primary neutral background */
+  --deep-merlot:     #542832;  /* selective premium accent. use sparingly */
+  --graphite:        #181319;  /* body copy */
+  --white:           #FFFFFF;
+
+  /* Derived. */
+  --rose-dark:       #C9928C;  /* Innovation Rose darkened 8%, for button hover */
+  --hairline:        #E4DBDC;
+
+  /* Clinical Navy is a verified 5.18:1 on white, but only 4.19:1 on Soft Blush,
+     which is under AA. Secondary text therefore reads through this token, and
+     .band-blush swaps in a 10% darker navy at 4.95:1. Identical to the eye. */
+  --ink-secondary:   #646B91;  /* = Clinical Navy */
+  --navy-on-blush:   #5A6083;
+
+  --font-display: 'Inter', -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-body:    'Lato', -apple-system, 'Segoe UI', Arial, sans-serif;
+
+  /* Moovia's signature easing. Fast out, long settle. Used on everything. */
+  --ease: cubic-bezier(0.62, 0.16, 0.14, 0.99);
+
+  /* Content column, following Moovia's 60/80/90vw ladder */
+  --col: 60vw;
+  --gutter: 2vw;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; background: var(--white); }
+::-webkit-scrollbar-track { background: var(--white); }
+::-webkit-scrollbar-thumb { background: var(--clinical-navy); border-radius: 5px; border: 2px solid var(--white); }
+
+html {
+  /* 62.5% rather than a hard 10px, so 1rem = 10px by default but still
+     honours the reader's browser font size. Required for the 200% resize test. */
+  font-size: 62.5%;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  background: var(--white);
+  color: var(--graphite);
+  font-family: var(--font-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media screen and (min-width: 2000px) { html { font-size: 0.5vw; } }
+
+body { margin: 0; padding: 0; line-height: 1.65; }
+main { display: block; position: relative; z-index: 1; overflow: hidden; font-size: 1.8rem; }
+
+img, svg { max-width: 100%; }
+strong, b { font-weight: 700; }
+em, i { font-style: italic; }
+
+/* Anchor targets clear the fixed header */
+[id] { scroll-margin-top: 11rem; }
+
+.skip-link {
+  position: absolute;
+  left: 1.6rem; top: -8rem;
+  z-index: 2000;
+  padding: 1rem 1.6rem;
+  background: var(--midnight-plum);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  text-decoration: none;
+  border-radius: 0.6rem;
+  transition: top 0.3s var(--ease);
+}
+.skip-link:focus { top: 1.6rem; }
+
+/* One focus treatment for the whole page */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--clinical-navy);
+  outline-offset: 2px;
+  border-radius: 0.4rem;
+}
+.head a:focus-visible,
+.band-plum a:focus-visible,
+.main-footer a:focus-visible {
+  outline-color: var(--white);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
+/* ==========================================================================
+   01  Header, round buttons, overlay navigation
+   ========================================================================== */
+
+.main-header {
+  font-family: var(--font-display);
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
+  top: 3vh;
+  left: 0;
+  height: 6rem;
+  padding: 0 calc(3vw + 1rem);
+  pointer-events: none;
+  color: var(--midnight-plum);
+}
+
+/* The top scrim. Fades in on scroll so the header stays legible over any
+   background. Moovia does exactly this with a black gradient. */
+.main-header:before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 16.8rem;
+  background: linear-gradient(to bottom, var(--midnight-plum), 40%, rgba(52, 42, 80, 0) 99%);
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 0;
+  transition: opacity 0.4s var(--ease);
+}
+.scrolled .main-header:before { opacity: 0.92; }
+
+/* --- Logo lock-up ------------------------------------------------------- */
+
+.main-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  align-self: center;
+  pointer-events: all;
+  position: relative;
+  z-index: 3;
+  text-decoration: none;
+  color: inherit;
+}
+.main-header-logo picture { display: block; flex: none; }
+.main-header-logo .mark { display: block; width: 4.6rem; height: auto; flex: none; }
+.main-header-logo .wordmark {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--midnight-plum);
+  transition: color 0.3s var(--ease);
+}
+.main-header-logo .wordmark em {
+  display: block;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.94em;
+  letter-spacing: 0.055em;
+  color: var(--clinical-navy);
+  transition: color 0.3s var(--ease);
+}
+@media screen and (max-width: 560px) {
+  .main-header-logo { gap: 0.7rem; }
+  .main-header-logo .mark { width: 3.8rem; }
+  .main-header-logo .wordmark { font-size: 1.05rem; letter-spacing: 0.06em; }
+}
+@media screen and (max-width: 330px) { .main-header-logo .wordmark { display: none; } }
+
+/* The mark is the supplied UFMT icon, cropped out of the master lock-up and
+   carrying its own alpha. It is a full-colour rendered mark, so it does not
+   reverse: it reads as-is on white and on Midnight Plum alike. The wordmark
+   beside it is live text, which is what reverses.
+
+   Moovia rotates two rings inside its logo on hover. That is not available on
+   a rendered mark, so the lock-up converges instead: the icon lifts very
+   slightly and the wordmark tightens. Same family of motion, no spin. */
+.main-header-logo .mark,
+.main-footer .mark {
+  transition: transform 0.5s var(--ease);
+  transform-origin: center;
+}
+.main-header-logo:hover .mark,
+.main-header-logo:focus-visible .mark,
+.main-footer .footer-logo:hover .mark { transform: scale(1.07); }
+
+/* Reversed state, over the hero and once scrolled */
+.white .main-header-logo .wordmark,
+.white .main-header-logo .wordmark em,
+.scrolled .main-header-logo .wordmark,
+.scrolled .main-header-logo .wordmark em { color: var(--white); }
+
+/* --- Centre menu -------------------------------------------------------- */
+
+.main-header-menu {
+  position: relative;
+  display: flex;
+  gap: 2.4rem;
+  justify-content: center;
+  align-items: center;
+  transition: 0.6s var(--ease);
+  transition-property: top, color;
+  top: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: all;
+  z-index: 4;
+}
+.main-header-menu a {
+  display: block;
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  padding: 1.5rem 0;
+}
+.main-header-menu a:after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 0.2rem;
+  border-radius: 1000px;
+  background: var(--innovation-rose);
+  position: absolute;
+  bottom: 1rem; left: 0;
+  transform: scale(0, 1);
+  transition: transform 0.3s var(--ease);
+}
+.main-header-menu a:hover:after { transform: scale(0.24, 1); }
+.main-header-menu a.active:after { transform: scale(1, 1); }
+.white .main-header-menu, .scrolled .main-header-menu { color: var(--white); }
+/* Menu retreats upward on scroll. Moovia's move exactly. */
+.scrolled .main-header-menu { top: calc(-7rem - 3vh); }
+@media screen and (max-width: 1180px) { .main-header-menu { display: none; } }
+
+/* --- Round buttons ------------------------------------------------------ */
+
+.main-header-buttons {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  align-items: center;
+  pointer-events: all;
+  position: relative;
+}
+.white .main-header-buttons, .scrolled .main-header-buttons { color: var(--white); }
+
+.btn-round {
+  display: block;
+  width: 4.8rem; height: 4.8rem;
+  cursor: pointer;
+  color: inherit;
+  position: relative;
+  background: transparent;
+  z-index: 1;
+  border: 0 none;
+  margin: 0; padding: 0;
+  transition: all 0.4s var(--ease);
+}
+.btn-round .circle { width: 100%; height: 100%; transform-origin: center; transform: rotate(135deg); }
+.btn-round .circle circle {
+  stroke-dasharray: 132;
+  stroke-dashoffset: 0;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  transition: stroke-dashoffset 0.6s var(--ease);
+}
+/* The ring unwinds on hover */
+.btn-round:hover .circle circle { stroke-dashoffset: 132; }
+.btn-round .icon {
+  display: block;
+  width: 2.2rem; height: 2.2rem;
+  position: absolute; top: 50%; left: 50%;
+  fill: none; stroke: currentColor; stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+  transform: translate(-50%, -50%);
+}
+.btn-round .burger {
+  display: block;
+  width: 1.8rem; height: 0.2rem;
+  background: currentColor;
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  transition: 0.6s var(--ease);
+  transition-property: background, transform;
+}
+.btn-round .burger:before, .btn-round .burger:after {
+  content: "";
+  display: block;
+  width: 100%; height: 100%;
+  background: currentColor;
+  position: absolute; top: 0; left: 0;
+  transform: translate(0, -250%);
+  transition: 0.6s var(--ease);
+  transition-property: background, transform;
+}
+.btn-round .burger:after { transform: translate(0, 250%); }
+.btn-menu-burger { position: relative; z-index: 501; }
+.menu-opened .btn-round .burger { background: transparent; transform: translate(-50%, -50%) rotateZ(-180deg); }
+.menu-opened .btn-round .burger:before,
+.menu-opened .btn-round .burger:after { background: currentColor; transform: translate(0, 0) rotateZ(45deg); }
+.menu-opened .btn-round .burger:after { transform: translate(0, 0) rotateZ(-45deg); }
+.menu-opened .btn-menu-burger { color: var(--midnight-plum); }
+.btn-menu-agenda .circle { transform: rotate(225deg); }
+
+/* --- Full screen overlay navigation ------------------------------------- */
+
+.main-header-nav {
+  position: fixed;
+  z-index: 500;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  background: var(--soft-blush);
+  transition: 0.3s var(--ease);
+  transition-property: opacity, visibility;
+}
+.main-header-nav .nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  order: 2;
+  width: 50%;
+  padding: 5.2rem 4vw;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 2.6em;
+  text-transform: uppercase;
+  color: var(--midnight-plum);
+  transform: translate(-10rem, 0);
+  transition: transform 0.7s var(--ease);
+}
+.main-header-nav .nav .logo { display: block; padding-bottom: 3rem; }
+.main-header-nav .nav .logo img { display: block; width: 100%; max-width: 22rem; height: auto; }
+.main-header-nav .nav ul li a {
+  color: inherit;
+  text-decoration: none;
+  /* Moovia rests these at 0.5. Midnight Plum at 0.5 on Soft Blush lands on the
+     wrong side of AA, so they rest at 0.68 and still lift to full on hover. */
+  opacity: 0.68;
+  transition: opacity 0.3s var(--ease);
+}
+.main-header-nav .nav ul li a:hover { opacity: 1; }
+
+.main-header-nav .activities {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  flex-grow: 1;
+  padding: 5.2rem 2.4rem;
+  background-image: linear-gradient(135deg, var(--midnight-plum), var(--deep-merlot));
+  color: var(--white);
+  text-transform: uppercase;
+  height: 100%;
+  overflow-x: auto;
+  transform: translate(-10rem, 0);
+  transition: transform 0.9s var(--ease);
+}
+/* The gradient cross-fade layer. Groups hand it a new pair of stops on hover. */
+.main-header-nav .activities .degrade {
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 1;
+  height: 100%; width: 100%;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+.main-header-nav .activities .degrade.show { opacity: 1; }
+.main-header-nav .activities .group {
+  position: relative;
+  z-index: 2;
+  width: 50%;
+  flex-shrink: 1;
+  padding: 1.2rem 1.6rem;
+  opacity: 0;
+  transform: translate(-2rem, 0);
+  transition: 0.3s var(--ease);
+  transition-property: transform, opacity;
+}
+.main-header-nav .activities .group > a,
+.main-header-nav .activities .group > .group-title {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0 0 0.6rem 0.8rem;
+  color: inherit;
+  text-decoration: none;
+}
+.main-header-nav .activities .group ul li a {
+  display: inline-block;
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.8rem 0.3rem 0.8rem;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  line-height: 1.7rem;
+}
+.main-header-nav .activities .group ul li a:hover { background: rgba(0, 0, 0, 0.14); }
+.main-header-nav .activities .group ul li.special a { background: rgba(0, 0, 0, 0.14); }
+.main-header-nav .activities .group ul li.special a:after {
+  content: "";
+  display: block;
+  width: 0.8rem; height: 0.8rem;
+  border: 0.2rem solid var(--white);
+  border-left: 0; border-bottom: 0;
+  opacity: 0;
+  position: absolute; top: 50%; right: 0;
+  transform: translate(100%, -50%) rotate(45deg);
+  transition: 0.4s var(--ease);
+  transition-property: opacity, transform;
+}
+.main-header-nav .activities .group ul li.special a:hover:after { opacity: 1; transform: translate(200%, -50%) rotate(45deg); }
+
+/* With the overlay open the header sits on Soft Blush, so the lock-up comes
+   back to ink whatever the underlying scroll state was. */
+.menu-opened .main-header:before { opacity: 0; }
+.menu-opened .main-header-logo .wordmark { color: var(--midnight-plum); }
+.menu-opened .main-header-logo .wordmark em { color: var(--clinical-navy); }
+.menu-opened .main-header-logo .mark-ink { fill: var(--midnight-plum); }
+.menu-opened .main-header-buttons { color: var(--midnight-plum); }
+
+.menu-opened { overflow: hidden; }
+.menu-opened .main-header-nav { pointer-events: all; opacity: 1; visibility: visible; }
+.menu-opened .main-header-nav .nav,
+.menu-opened .main-header-nav .activities { transform: translate(0, 0); }
+.menu-opened .main-header-nav .activities .group { transform: translate(0, 0); opacity: 1; }
+.menu-opened .main-header-nav .activities .group:nth-child(1) { transition-delay: 0.25s; }
+.menu-opened .main-header-nav .activities .group:nth-child(2) { transition-delay: 0.30s; }
+.menu-opened .main-header-nav .activities .group:nth-child(3) { transition-delay: 0.35s; }
+.menu-opened .main-header-nav .activities .group:nth-child(4) { transition-delay: 0.40s; }
+.menu-opened .main-header-nav .activities .group:nth-child(5) { transition-delay: 0.45s; }
+.menu-opened .main-header-nav .activities .group:nth-child(6) { transition-delay: 0.50s; }
+
+@media screen and (max-width: 1024px) {
+  .main-header-nav .nav { width: 42%; font-size: 1.5rem; line-height: 2.4em; }
+  .main-header-nav .nav .logo img { max-width: 15rem; }
+}
+@media screen and (max-width: 900px) {
+  .main-header-nav .nav { width: 50%; }
+  .main-header-nav .activities { width: 50%; display: block; padding: 2.4rem 0; overflow-y: auto; }
+  .main-header-nav .activities .group { width: auto; padding: 1.4rem 1.6rem; }
+}
+@media screen and (max-width: 680px) {
+  .main-header-nav { display: block; overflow-y: auto; }
+  .main-header-nav .nav { display: block; width: 100%; padding: 9rem 2.4rem 2.4rem; }
+  .main-header-nav .activities { width: 100%; overflow: visible; }
+  .main-header-nav .activities .group { padding: 1.8rem 1.6rem; }
+}
+@media screen and (max-width: 400px) {
+  .main-header-nav .nav { font-size: 1.3rem; line-height: 2.6em; }
+  .main-header-nav .nav .logo img { max-width: 12rem; }
+}
+
+/* ==========================================================================
+   02  Buttons
+   ========================================================================== */
+
+/* Moovia's pill: 2px currentColor border, fills with currentColor on hover.
+   The UFMT constraint is that Innovation Rose never carries white text, so the
+   filled state here uses Midnight Plum text on rose, at 6.4:1. */
+.btn {
+  display: inline-block;
+  width: auto;
+  padding: 0.9rem 1.75rem;
+  border: 0.2rem solid var(--innovation-rose);
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 100rem;
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  line-height: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--midnight-plum);
+  text-decoration: none;
+  transition: 0.4s var(--ease);
+  transition-property: background, border-color, transform, color;
+}
+.btn:hover { background: var(--innovation-rose); transform: translateY(-1px); }
+.btn.reverse { background: var(--innovation-rose); }
+.btn.reverse:hover { background: var(--rose-dark); border-color: var(--rose-dark); transform: translateY(-1px); }
+
+/* Secondary: outlined in Midnight Plum, per the brief */
+.btn.ghost { border-color: var(--midnight-plum); border-width: 0.15rem; }
+.btn.ghost:hover { background: var(--midnight-plum); color: var(--white); }
+
+/* On dark ground the outline goes white and the fill is rose with plum text */
+.btn.on-dark { color: var(--white); border-color: var(--white); }
+.btn.on-dark:hover { background: var(--white); color: var(--midnight-plum); }
+.btn.on-dark.reverse { background: var(--innovation-rose); border-color: var(--innovation-rose); color: var(--midnight-plum); }
+.btn.on-dark.reverse:hover { background: var(--white); border-color: var(--white); color: var(--midnight-plum); }
+
+.buttons { display: flex; flex-wrap: wrap; gap: 1.2rem; margin: 2.4rem 0 0; }
+
+/* ==========================================================================
+   03  Hero (.head)
+   ========================================================================== */
+
+.head {
+  position: relative;
+  width: 100%;
+  min-height: 92vh;
+  padding: 13rem 20vw 7rem;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 1.8rem;
+  line-height: 2.9rem;
+  background: var(--midnight-plum);
+}
+.head .head-bg { position: absolute; inset: 0; z-index: 0; }
+.head .head-bg img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 72% 30%; }
+/* The scrim. The text column ends around 67% of the width, and plum at 0.72
+   over a white ground already clears 5.1:1 against white type, so the gradient
+   only has to stay above ~0.70 out to that point. Past it the alpha drops to
+   0.58, which still holds 3.6:1 for the round buttons in the top right and lets
+   more of the photograph through. */
+.head .head-bg:after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(100deg, rgba(52, 42, 80, 0.94) 0%, rgba(52, 42, 80, 0.86) 45%, rgba(52, 42, 80, 0.72) 70%, rgba(52, 42, 80, 0.58) 100%),
+    linear-gradient(to top, rgba(52, 42, 80, 0.45), rgba(52, 42, 80, 0) 45%);
+}
+/* Only the text block is lifted into flow above the scrim. The motif stays
+   absolutely positioned, or it would add its own height to the hero. */
+.head .head-inner { position: relative; z-index: 2; max-width: 68rem; }
+
+.head .review-line { color: var(--soft-blush); margin-bottom: 2.4rem; }
+
+.head h1 {
+  display: inline-block;
+  position: relative;
+  left: -0.3rem;
+  padding-bottom: 3.2rem;
+  margin-bottom: 3.2rem;
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 5vw, 6.4rem);
+  line-height: 1.08;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+}
+.head h1 .lead { display: block; font-weight: 700; }
+.head h1 .follow { display: block; font-weight: 200; }
+/* The 48px hairline under the H1. Moovia's signature rule. */
+.head h1:after {
+  content: "";
+  display: block;
+  width: 4.8rem; height: 0.2rem;
+  position: absolute; bottom: 0; left: 0.3rem;
+  background: var(--innovation-rose);
+}
+.head .subhead {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.2vw, 2.4rem);
+  line-height: 1.4;
+  font-weight: 600;
+  max-width: 58rem;
+}
+.head .claim {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.5rem 1.4rem;
+  border-left: 0.3rem solid var(--innovation-rose);
+  background: rgba(255, 255, 255, 0.10);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.8vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+/* White rather than Soft Blush. Blush reads at 3.7:1 against the lightest part
+   of the scrim, which is under AA; white holds 4.55:1 at the same point. The
+   hierarchy is carried by size instead of tint. */
+.head .reassurance {
+  margin-top: 1.8rem;
+  max-width: 62rem;
+  font-size: 1.5rem;
+  line-height: 1.7;
+  color: var(--white);
+}
+.head .location { margin-top: 2rem; max-width: 56rem; }
+.head .small { font-size: 1.35rem; line-height: 1.6; color: var(--white); }
+.head .small a { color: inherit; }
+
+@media screen and (max-width: 1280px) { .head { padding-left: 10vw; padding-right: 10vw; } }
+@media screen and (max-width: 900px) {
+  .head { padding: 11rem 5vw 7rem; min-height: 0; }
+  /* Tightened so the claim line and the reassurance above it both clear the
+     fold on a 390px viewport, which is the point of the whole block. */
+  .head .review-line { margin-bottom: 1.8rem; }
+  .head .reassurance { margin-top: 1.4rem; }
+  .head .head-bg img { object-position: 66% 18%; }
+  /* Portrait viewport, so the scrim runs top to bottom instead of across.
+     Lighter at the top, where the photograph is, heavier under the text. The
+     0.70 floor keeps the white lock-up legible over the bright window. */
+  .head .head-bg:after {
+    background: linear-gradient(to bottom, rgba(52, 42, 80, 0.70) 0%, rgba(52, 42, 80, 0.90) 34%, rgba(52, 42, 80, 0.96) 62%);
+  }
+  .head h1 { padding-bottom: 2.2rem; margin-bottom: 2.4rem; }
+}
+
+/* ==========================================================================
+   04  The pathway motif and hero zoom
+   ========================================================================== */
+
+/* --- Hero zoom -----------------------------------------------------------
+   The hero photograph scales up as the reader scrolls down into the page and
+   back down as they scroll up. It is tied to scroll position rather than
+   played once, so it runs in both directions and always matches where the
+   reader actually is.
+
+   Scaling only ever crops inward, so unlike a translate there is no overscan
+   to keep in sync and no way to expose an edge. The picture clips it.
+
+   The .hero-zoom class is added by the script only when it actually runs, so
+   with JavaScript off — or under prefers-reduced-motion, where the script
+   never initialises — the photograph simply sits at its natural scale. */
+
+.head .head-bg picture { position: absolute; inset: 0; display: block; overflow: hidden; }
+.hero-zoom .head .head-bg img { transform-origin: 50% 50%; will-change: transform; }
+
+/* The motif, sitting faintly behind the four step sequence */
+.motif-bed {
+  position: absolute;
+  right: -8rem; top: 50%;
+  width: 52rem; height: 52rem;
+  transform: translate(0, -50%);
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
+@media screen and (max-width: 900px) { .motif-bed { display: none; } }
+
+/* Section divider: concentric arcs converging on the centre */
+.divider {
+  display: block;
+  width: 100%;
+  max-width: 60vw;
+  height: 4.4rem;
+  margin: 0 auto;
+  overflow: visible;
+}
+.divider path { fill: none; stroke: var(--future-blue); stroke-width: 1.4; opacity: 0.5; }
+@media screen and (max-width: 1280px) { .divider { max-width: 80vw; } }
+@media screen and (max-width: 768px)  { .divider { max-width: 90vw; } }
+
+/* ==========================================================================
+   05  Sections, columns, bleeding rules
+   ========================================================================== */
+
+/* Moovia's section is the layout primitive: a flex row on a 60vw measure that
+   narrows to 80vw then 90vw, with columns as direct children. */
+.cols {
+  display: flex;
+  gap: 0 var(--gutter);
+  margin: 0 auto;
+  width: var(--col);
+}
+.cols .col { position: relative; width: 100%; }
+.cols .col-6 { width: 100%; }
+.cols.middle { align-items: center; }
+
+@media screen and (max-width: 1280px) { :root { --col: 80vw; --gutter: 3.5vw; } }
+@media screen and (max-width: 900px) {
+  :root { --col: 90vw; --gutter: 0; }
+  .cols { flex-direction: column; }
+  .cols.desc { flex-direction: column-reverse; }
+}
+
+/* Full-bleed colour bands. The section inside keeps the 60vw measure. */
+.band { position: relative; padding: 8rem 0; }
+.band-white  { background: var(--white); }
+.band-blush  { background: var(--soft-blush); --ink-secondary: var(--navy-on-blush); }
+.band-plum   { background: var(--midnight-plum); color: var(--white); }
+@media screen and (max-width: 900px) { .band { padding: 5rem 0; } }
+
+.band-plum .section-label { color: var(--future-blue); }
+.band-plum .display-line { color: var(--white); }
+.band-plum p { color: var(--white); }
+.band-plum .small { color: var(--future-blue); }
+.band-plum a { color: var(--innovation-rose); }
+
+/* The two-line heading pattern. The h2 carries the query language, the display
+   line carries the weight. */
+.section-label {
+  font-family: var(--font-body);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin: 0 0 1.2rem;
+}
+.display-line {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.5vw, 4.4rem);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--midnight-plum);
+  margin: 0 0 2.4rem;
+  font-optical-sizing: auto;
+}
+h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--midnight-plum);
+}
+.band-plum h3 { color: var(--white); }
+
+.cols p, .cols li {
+  font-size: clamp(1.55rem, 2.5vw, 1.75rem);
+  line-height: 1.65;
+  max-width: 68ch;
+}
+.cols .lead { font-size: clamp(1.75rem, 3vw, 2.1rem); line-height: 1.55; }
+/* .fiche is deliberately left out. It sets its own negative margins to bleed
+   out of the measure, and a more specific rule here would cancel them. */
+.cols p, .cols ul, .cols ol, .cols .blockquote, .cols .definition-block { margin: 2rem 0; }
+.cols p:first-child, .cols h3:first-child { margin-top: 0; }
+
+.small { font-size: 1.35rem; line-height: 1.6; color: var(--ink-secondary); }
+.cols .small { max-width: 74ch; }
+/* Links in running copy are underlined. Buttons are not links in that sense. */
+.cols a:not(.btn) { color: var(--deep-merlot); text-decoration: underline; text-underline-offset: 0.2em; }
+.cols a:not(.btn):hover { text-decoration-thickness: 0.2rem; }
+.cols a.btn { text-decoration: none; }
+
+/* The rule that bleeds out of the measure into the margin. Moovia uses this
+   everywhere to break the column edge. */
+.rule {
+  border: 0 none;
+  height: 0.1rem;
+  background: var(--innovation-rose);
+  margin: 0 0 3.5rem -20vw;
+  width: 49vw;
+}
+.rule.right { margin-left: 0; margin-right: -20vw; margin-left: auto; }
+@media screen and (max-width: 1280px) { .rule { width: 48.25vw; margin-left: -10vw; } .rule.right { margin-left: auto; margin-right: -10vw; } }
+@media screen and (max-width: 900px)  { .rule { width: 70vw; margin-left: -5vw; } .rule.right { margin-left: -5vw; margin-right: 0; } }
+.band-plum .rule { background: var(--clinical-navy); }
+/* The system is shown as a room photograph rather than a cutout on white, so
+   it is framed directly instead of being floated on a white card. */
+.band-plum .device { border-radius: 1.6rem; overflow: hidden; box-shadow: 0 4px 28px rgba(0, 0, 0, 0.32); }
+.band-plum .device picture { display: block; }
+.band-plum .device img { display: block; width: 100%; height: auto; }
+
+/* ==========================================================================
+   06  Content components
+   ========================================================================== */
+
+/* Definition block. Written to survive being lifted out of the page whole. */
+.definition-block {
+  /* Blush surfaces carry the darker secondary ink wherever they appear, not
+     only inside .band-blush. */
+  --ink-secondary: var(--navy-on-blush);
+  background: var(--soft-blush);
+  border-left: 0.4rem solid var(--innovation-rose);
+  padding: 2.4rem 2.8rem;
+  border-radius: 0 1.6rem 1.6rem 0;
+}
+.definition-block p { font-size: clamp(1.6rem, 2.6vw, 1.85rem); line-height: 1.6; margin: 0; color: var(--graphite); }
+
+/* Pull quote, in Moovia's « » treatment */
+.blockquote {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.4vw, 2.8rem);
+  line-height: 1.3;
+  font-weight: 300;
+  color: var(--deep-merlot);
+  font-style: italic;
+}
+.blockquote blockquote:before { content: "« "; }
+.blockquote blockquote:after { content: " »"; }
+.blockquote figcaption { font-family: var(--font-body); font-weight: 700; font-size: 1.4rem; font-style: normal; line-height: 2.4rem; color: var(--ink-secondary); }
+
+/* Benefit points */
+.points { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem var(--gutter); margin: 3.5rem 0; padding: 0; list-style: none; }
+@media screen and (max-width: 900px) { .points { grid-template-columns: 1fr; gap: 2rem; } }
+.points li { display: flex; gap: 1.4rem; align-items: flex-start; max-width: none; }
+.points .ico { flex: none; width: 3.4rem; height: 3.4rem; stroke: var(--midnight-plum); fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.points strong { display: block; font-family: var(--font-display); font-weight: 700; color: var(--midnight-plum); }
+
+/* The .fiche. A full-bleed image with a gradient panel overhanging the corner.
+   Moovia's strongest layout device, used here for the adenomyosis block. */
+/* The image and the panel share one grid cell, so the block is always as tall
+   as whichever is taller and the panel can never spill off the photograph. */
+.fiche { display: grid; margin: 7rem -20vw; }
+@media screen and (max-width: 1280px) { .fiche { margin: 5rem -10vw; } }
+@media screen and (max-width: 900px)  { .fiche { margin: 4rem -5vw 3rem; } }
+/* The <picture> is the grid item, not the <img> inside it, so the cell and the
+   minimum height belong on the wrapper and the fit belongs on the image. */
+.fiche > picture { grid-area: 1 / 1; display: block; min-height: 62rem; }
+.fiche .fiche-img { display: block; width: 100%; height: 100%; min-height: inherit; object-fit: cover; object-position: 50% 42%; }
+.fiche .text {
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: start;
+  width: 78vw;
+  padding: 6rem 4vw 6rem 20vw;
+  background: linear-gradient(135deg, var(--midnight-plum), var(--deep-merlot));
+  color: var(--white);
+}
+.fiche .text *, .fiche .text a { color: var(--white); }
+.fiche .text .section-label { color: var(--innovation-rose); }
+.fiche .text *:first-child { margin-top: 0; }
+.fiche .text *:last-child { margin-bottom: 0; }
+.fiche .text .btn { color: var(--white); border-color: var(--white); margin-top: 2.4rem; }
+.fiche .text .btn:hover { background: var(--white); color: var(--midnight-plum); }
+@media screen and (max-width: 1280px) { .fiche .text { width: 82vw; padding: 4.5rem 3.5vw 4.5rem 10vw; } }
+@media screen and (max-width: 900px) {
+  /* Stacked below the image rather than over it, so the copy keeps its measure */
+  .fiche { display: block; }
+  .fiche > picture { min-height: 0; }
+  .fiche .fiche-img { height: 26rem; min-height: 0; }
+  .fiche .text { width: auto; padding: 3.5rem 5vw; }
+}
+
+/* Cards used for the three About blocks */
+.blocks { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gutter); margin: 4rem 0 0; padding: 0; list-style: none; }
+@media screen and (max-width: 900px) { .blocks { grid-template-columns: 1fr; gap: 2rem; } }
+.blocks li { padding: 2.4rem; border-top: 0.2rem solid var(--innovation-rose); max-width: none; }
+.blocks .t { display: block; font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; color: var(--innovation-rose); margin-bottom: 0.8rem; }
+
+.tagline {
+  display: block;
+  text-align: center;
+  margin-top: 6rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--innovation-rose);
+}
+
+/* Team, on Moovia's praticiens grid */
+.person { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--gutter); align-items: start; }
+@media screen and (max-width: 900px) { .person { grid-template-columns: 1fr; gap: 2.4rem; } }
+.person .img { position: relative; overflow: hidden; border-radius: 1.6rem; box-shadow: 0 2px 12px rgba(52, 42, 80, 0.08); background: var(--white); }
+.person .img img { display: block; width: 100%; height: auto; transition: transform 0.6s var(--ease); }
+.person .img:hover img { transform: scale(1.03); }
+.person .name { font-family: var(--font-display); font-size: clamp(2rem, 3vw, 2.6rem); font-weight: 700; color: var(--midnight-plum); margin-bottom: 0.4rem; }
+.person .role { font-size: 1.5rem; font-style: italic; color: var(--ink-secondary); margin-bottom: 2rem; }
+
+/* Sources */
+.sources { counter-reset: src; list-style: none; padding: 0; margin: 2rem 0 0; }
+.sources li { position: relative; padding-left: 4.4rem; margin-bottom: 1.8rem; font-size: 1.4rem; line-height: 1.6; color: var(--ink-secondary); max-width: 90ch; }
+.sources li:before {
+  counter-increment: src;
+  content: counter(src);
+  position: absolute; left: 0; top: -0.4rem;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 300;
+  color: var(--innovation-rose);
+}
+.sources li a { color: var(--deep-merlot); }
+
+/* ==========================================================================
+   07  Steps
+   ========================================================================== */
+
+.steps { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gutter); margin: 4rem 0 0; padding: 0; list-style: none; }
+.steps li { position: relative; padding-top: 2.4rem; border-top: 0.1rem solid var(--innovation-rose); max-width: none; }
+/* The numerals are Innovation Rose on white, as the brief specifies. That is
+   2.06:1, which is under the AA threshold for text, so they are marked
+   aria-hidden and the sequence they express is carried programmatically by the
+   <ol> and by each step's <h3>. On that reading they are decorative
+   duplication and exempt. If UFMT would rather be strictly compliant on the
+   visible numeral, change the colour below to var(--deep-merlot), which is
+   12.16:1. It is a one line change and nothing else depends on it. */
+.steps .n {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 4.8rem;
+  line-height: 1;
+  font-weight: 200;
+  color: var(--innovation-rose);
+  margin-bottom: 0.8rem;
+}
+.steps h3 { font-size: 1.9rem; margin-bottom: 0.8rem; }
+.steps p { font-size: 1.5rem; line-height: 1.6; }
+@media screen and (max-width: 900px) {
+  /* Vertical timeline on mobile */
+  .steps { grid-template-columns: 1fr; gap: 0; }
+  .steps li { padding: 0 0 3rem 5.4rem; border-top: 0 none; border-left: 0.1rem solid var(--innovation-rose); }
+  .steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .steps .n { position: absolute; left: 0; top: -0.6rem; transform: translateX(-50%); background: var(--white); padding: 0 0.6rem; font-size: 3.2rem; }
+}
+
+/* ==========================================================================
+   08  Comparison table
+   ========================================================================== */
+
+.table-wrap { overflow-x: auto; margin: 3rem 0; -webkit-overflow-scrolling: touch; }
+.table-wrap:focus-visible { outline: 3px solid var(--clinical-navy); outline-offset: 4px; }
+table { border-collapse: collapse; width: 100%; min-width: 64rem; font-size: 1.5rem; }
+/* The two-column summary fits any viewport, so it is not held to the
+   min-width that a four-column comparison needs in order to stay readable. */
+table.summary { min-width: 0; max-width: 62rem; }
+caption { text-align: left; font-size: 1.35rem; color: var(--ink-secondary); padding-bottom: 1rem; }
+thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--midnight-plum);
+  text-align: left;
+  padding: 1.2rem 1.4rem;
+  border-bottom: 0.2rem solid var(--innovation-rose);
+  vertical-align: bottom;
+}
+thead th.is-hifu { background: var(--soft-blush); }
+tbody th {
+  font-weight: 700;
+  color: var(--midnight-plum);
+  text-align: left;
+  padding: 1.4rem 1.4rem;
+  border-bottom: 0.1rem solid var(--hairline);
+  white-space: nowrap;
+}
+tbody td { padding: 1.4rem 1.4rem; border-bottom: 0.1rem solid var(--hairline); color: var(--graphite); vertical-align: top; }
+tbody td.is-hifu { background: var(--soft-blush); }
+
+.panel {
+  --ink-secondary: var(--navy-on-blush);
+  margin: 4rem 0 0;
+  padding: 3rem 3.2rem;
+  background: var(--soft-blush);
+  border-radius: 1.6rem;
+  box-shadow: 0 2px 12px rgba(52, 42, 80, 0.08);
+}
+.panel *:first-child { margin-top: 0; }
+.panel *:last-child { margin-bottom: 0; }
+
+/* ==========================================================================
+   09  FAQ
+   Native details/summary. All twenty-one answers are in the source at load and
+   are collapsed by CSS. Nothing here is fetched or built by script.
+   ========================================================================== */
+
+.faq { margin: 3rem 0 0; border-top: 0.1rem solid var(--hairline); }
+.faq-item { border-bottom: 0.1rem solid var(--hairline); }
+.faq-item summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+  cursor: pointer;
+  padding: 2rem 0;
+  transition: color 0.3s var(--ease);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--midnight-plum);
+}
+.faq-item summary:hover h3 { color: var(--deep-merlot); }
+.faq-item .chev {
+  flex: none;
+  width: 1.6rem; height: 1.6rem;
+  border: 0.2rem solid var(--innovation-rose);
+  border-left: 0; border-top: 0;
+  transform: rotate(45deg) translate(-0.3rem, -0.3rem);
+  transition: transform 0.4s var(--ease);
+}
+.faq-item[open] .chev { transform: rotate(225deg) translate(-0.2rem, -0.2rem); }
+.faq-item[open] summary h3 { color: var(--deep-merlot); }
+.faq-answer { padding: 0 0 2.4rem; max-width: 74ch; }
+.faq-answer p { font-size: 1.6rem; line-height: 1.7; }
+.faq-answer p + p { margin-top: 1.2rem; }
+
+/* ==========================================================================
+   10  Form
+   Moovia's floating-label field. The label is a real <label>, always in the
+   accessibility tree, so nothing here relies on placeholder text.
+   ========================================================================== */
+
+.form { display: flex; flex-wrap: wrap; gap: 3rem; padding: 3rem 0 0; position: relative; }
+.form .input { position: relative; width: 100%; }
+.form .input.half { width: calc(50% - 1.5rem); flex-grow: 1; min-width: 24rem; }
+@media screen and (max-width: 680px) { .form .input.half { width: 100%; } }
+.form .input > label {
+  position: absolute;
+  left: 0; top: 0;
+  transform: scale(1) translate(0, 1.1rem);
+  transform-origin: left top;
+  transition: transform 0.25s var(--ease), color 0.25s var(--ease);
+  font-size: 1.6rem;
+  color: var(--ink-secondary);
+  pointer-events: none;
+}
+.form .input input,
+.form .input select,
+.form .input textarea {
+  color: var(--graphite);
+  width: 100%;
+  padding: 1.1rem 0;
+  border: 0 none;
+  background: transparent;
+  border-bottom: 0.1rem solid var(--clinical-navy);
+  outline: 0 none;
+  font-family: var(--font-body);
+  font-size: 1.7rem;
+  border-radius: 0;
+  resize: none;
+  transition: border-color 0.25s var(--ease);
+}
+.form .input textarea { height: 12rem; }
+.form .input select { appearance: none; cursor: pointer; }
+.form .input.select:after {
+  content: "";
+  position: absolute; right: 0.4rem; bottom: 1.8rem;
+  width: 0.9rem; height: 0.9rem;
+  border: 0.2rem solid var(--clinical-navy);
+  border-left: 0; border-top: 0;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.form .input input:focus,
+.form .input select:focus,
+.form .input textarea:focus { border-bottom-color: var(--midnight-plum); border-bottom-width: 0.2rem; }
+.form .input input:focus + label,
+.form .input input.complete + label,
+.form .input textarea:focus + label,
+.form .input textarea.complete + label,
+.form .input select + label,
+.form .input select:focus + label { transform: scale(0.75) translate(0, -2.2rem); color: var(--midnight-plum); }
+.form .input input:focus-visible,
+.form .input select:focus-visible,
+.form .input textarea:focus-visible { outline: 0 none; }
+.form .input:focus-within { outline: 0 none; }
+.form .req { color: var(--deep-merlot); }
+
+.form .checkbox { display: flex; gap: 1.2rem; align-items: flex-start; width: 100%; }
+.form .checkbox input[type="checkbox"] {
+  flex: none;
+  width: 2rem; height: 2rem;
+  margin-top: 0.3rem;
+  accent-color: var(--midnight-plum);
+  cursor: pointer;
+}
+.form .checkbox label { font-size: 1.45rem; line-height: 1.6; color: var(--graphite); }
+
+.form .err { display: block; min-height: 1.8rem; margin-top: 0.4rem; font-size: 1.3rem; color: var(--deep-merlot); font-weight: 600; }
+.form .input.invalid input,
+.form .input.invalid select,
+.form .input.invalid textarea,
+.form .checkbox.invalid input { border-bottom-color: var(--deep-merlot); }
+
+/* Honeypot */
+.form .pot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.form .submit { width: 100%; display: flex; justify-content: flex-end; align-items: center; gap: 2rem; position: relative; }
+.form .submit .btn { margin: 0; }
+.form-message {
+  margin-top: 2.4rem;
+  padding: 2rem 2.4rem;
+  border-radius: 1.6rem;
+  font-size: 1.6rem;
+  line-height: 1.6;
+}
+.form-message:empty { display: none; }
+.form-message.valid { background: var(--white); border-left: 0.4rem solid var(--midnight-plum); color: var(--graphite); }
+.form-message.error { background: var(--white); border-left: 0.4rem solid var(--deep-merlot); color: var(--deep-merlot); }
+.form.wait { pointer-events: none; }
+.form.wait .input, .form.wait .checkbox, .form.wait .submit .btn { opacity: 0.4; }
+
+.contact-list { list-style: none; padding: 0; margin: 2.4rem 0 0; }
+.contact-list li { display: flex; gap: 1rem; padding: 0.6rem 0; font-size: 1.55rem; }
+.contact-list .t { font-weight: 700; color: var(--midnight-plum); min-width: 9rem; }
+
+/* ==========================================================================
+   11  Quick action bar
+   Fixed to the bottom, always present, so the primary call to action is never
+   more than one glance away. Moovia's quickAction, one for one.
+   ========================================================================== */
+
+.quickAction {
+  position: fixed;
+  z-index: 999;
+  bottom: 0; left: 0;
+  width: 100%;
+  padding: 1rem;
+  background: var(--white);
+  display: flex;
+  box-shadow: 0 0 10px 0 rgba(52, 42, 80, 0.28);
+  justify-content: center;
+  align-items: center;
+  font-size: 1.45rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.quickAction a.tel { color: var(--deep-merlot); text-decoration: none; font-weight: 600; }
+.quickAction a.tel:hover { text-decoration: underline; }
+.quickAction .hiddable { color: var(--ink-secondary); }
+@media screen and (max-width: 560px) { .quickAction .hiddable { display: none; } }
+/* Keep the bar off the last of the content */
+body { padding-bottom: 7.2rem; }
+.menu-opened .quickAction { display: none; }
+
+/* ==========================================================================
+   12  Footer
+   ========================================================================== */
+
+.main-footer {
+  position: relative;
+  background: var(--midnight-plum);
+  color: var(--white);
+  padding: 6rem 0 8rem;
+  font-size: 1.45rem;
+  line-height: 1.7;
+  margin-top: 0;
+}
+.main-footer .footer { position: relative; width: var(--col); margin: auto; }
+.main-footer .footer a { color: inherit; text-decoration: none; transition: color 0.4s var(--ease); }
+.main-footer .footer a:hover { color: var(--innovation-rose); }
+.main-footer .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 3rem; flex-wrap: wrap; }
+.main-footer .footer-logo { display: flex; align-items: center; gap: 1.2rem; }
+.main-footer .footer-logo picture { display: block; flex: none; }
+.main-footer .footer-logo .mark { display: block; width: 5.4rem; height: auto; flex: none; }
+.main-footer .footer-logo .wordmark { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; letter-spacing: 0.09em; text-transform: uppercase; line-height: 1.3; }
+.main-footer .footer-logo .wordmark em { display: block; font-style: normal; font-weight: 600; font-size: 0.94em; letter-spacing: 0.055em; color: var(--future-blue); }
+.main-footer .footer .t { font-family: var(--font-display); font-size: 1.6rem; line-height: 2.4rem; font-weight: 700; color: var(--innovation-rose); margin-bottom: 0.8rem; }
+.main-footer .infos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; padding-top: 4rem; }
+@media screen and (max-width: 768px) { .main-footer .infos { grid-template-columns: 1fr; gap: 2.4rem; } }
+.main-footer .infos ul { list-style: none; }
+.main-footer .socials { display: flex; gap: 1rem; list-style: none; padding-top: 3rem; }
+.main-footer .socials li a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 0.1rem solid currentColor;
+  border-radius: 50%;
+  width: 3.6rem; height: 3.6rem;
+  transition: transform 0.4s var(--ease), color 0.4s var(--ease);
+}
+.main-footer .socials li a svg { display: block; height: 1.5rem; width: auto; fill: currentColor; }
+.main-footer .socials li a:hover { transform: scale(1.1); color: var(--innovation-rose); }
+.main-footer hr { height: 0.1rem; border: 0 none; background: rgba(255, 255, 255, 0.18); margin: 3.5rem 0; }
+.main-footer .legal { color: var(--future-blue); font-size: 1.3rem; }
+.main-footer .legal p + p { margin-top: 1.2rem; }
+.main-footer .legal a { border-bottom: 0.1rem solid currentColor; }
+.main-footer .footer-tagline {
+  display: block;
+  text-align: center;
+  margin-top: 3.5rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--innovation-rose);
+}
+.main-footer .credit { display: block; text-align: center; margin-top: 2rem; font-size: 1.2rem; color: var(--future-blue); }
+
+/* ==========================================================================
+   13  Scroll reveal and reduced motion
+   The hidden state is applied by script, so with JavaScript off every element
+   renders in its final, visible position. Nothing is ever hidden by the
+   stylesheet alone.
+   ========================================================================== */
+
+.js .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *:before, *:after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .js .reveal { opacity: 1; transform: none; }
+  .hero-zoom .head .head-bg img { transform: none !important; }
+}
+
+@media print {
+  .main-header, .quickAction, .main-header-nav, .motif-bed { display: none !important; }
+  .faq-answer { display: block !important; }
+  body { padding-bottom: 0; }
+}
